@@ -13,53 +13,18 @@ function Square(props) {
   
 class Board extends React.Component {
 
-
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            arr: Array(9).fill(null),
-            isNext: true,
-        }
-    }
-
-    handleClick(mi) {
-
-        const carr = this.state.arr.slice();
-        carr[mi] = this.state.isNext ? 'X' : 'O';
-        this.setState({ 
-            arr: carr,
-            isNext: !this.state.isNext,
-        });
-
-        
-
-    }
-
     renderSquare(i) {
         return (
             <Square 
-                value2 = {this.state.arr[i]} 
-                onClick2 = { () => this.handleClick(i) }
+                value2 = {this.props.arr[i]} 
+                onClick2 = { () => this.props.onClick2(i) }
             />
         );
     }
 
     render() {
-        
-        const winner = calculateWinner(this.state.arr);
-        let status;
-
-        if(winner) {
-            status = "Wygrywa: " + winner;
-        } else {
-            status = 'Next player: ' + '' + (this.state.isNext ? 'X' : 'O');    
-        }
-        
-
         return (
             <div>
-                <div className="status">{status}</div>
                 <div className="board-row">
                 {this.renderSquare(0)}
                 {this.renderSquare(1)}
@@ -81,14 +46,60 @@ class Board extends React.Component {
 }
   
 class Game extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            history: [{
+                arrFromGame: Array(9).fill(null),
+            }],
+            isNext: true,
+        }
+    }
+
+
+    handleClick(mi) {
+
+        const history = this.state.history;
+        const current = history[history.length - 1];
+        const carr = current.arrFromGame.slice();
+
+        carr[mi] = this.state.isNext ? 'X' : 'O';
+
+        this.setState({ 
+            history: history.concat([{
+                arrFromGame: carr,
+            }]),
+            isNext: !this.state.isNext,
+        });
+    }
+
+
     render() {
+
+        const history = this.state.history;
+        const current = this.state.history[history.length - 1];
+        const winner = calculateWinner(current.arrFromGame);
+
+        let status;
+
+        if(winner) {
+            status = "Wygrywa: " + winner;
+        } else {
+            status = 'Next player: ' + '' + (this.state.isNext ? 'X' : 'O');    
+        }
+
+
         return (
             <div className="game">
                 <div className="game-board">
-                <Board />
+                <Board 
+                    arr = { current.arrFromGame }
+                    onClick2 = { (i) => this.handleClick(i) }
+                 />
                 </div>
                 <div className="game-info">
-                <div>{/* status */}</div>
+                <div> { status } </div>
                 <ol>{/* TODO */}</ol>
                 </div>
             </div>
